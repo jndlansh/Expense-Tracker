@@ -11,7 +11,7 @@ import pingRoute from './routes/ping.route.js'
 import authRoute from './routes/auth.route.js';
 import expenseRoute from "./routes/expense.route.js";
 import categoryRoute from "./routes/category.route.js";
-import { error } from 'console';
+
 
 //Load environment variables
 dotenv.config();
@@ -30,7 +30,7 @@ app.use(morgan('dev'));
 // ───────── routes
 app.use('/api/ping', pingRoute);
 app.use('/api/auth', authRoute);
-app.use('/api/category', categoryRoute);
+app.use('/api/categories', categoryRoute);
 app.use('/api/expenses', authRoute);
 
 // ───────── default route

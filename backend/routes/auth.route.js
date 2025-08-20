@@ -31,7 +31,7 @@ const loginValidation = [
 ];
 
 //Public routes
-router.post('/register', registerValidation. authController.register);
+router.post('/register', registerValidation, authController.register);
 router.post('/login', loginValidation, authController.login);
 
 //Protected routes (require authentication)

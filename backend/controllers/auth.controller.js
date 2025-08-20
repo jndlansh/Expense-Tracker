@@ -1,20 +1,19 @@
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
-import Category from "../models/category.model.js"
+import Category from "../models/category.model.js";
 
 class AuthController {
-  // Generate JWT token
-  generateToken(userId) {
+  // Generate JWT token (regular method is fine here)
+  generateToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
       expiresIn: '7d'
     });
-  }
+  };
 
   // Register new user
-  async register(req, res) {
+  register = async (req, res) => {
     try {
-      // Check validation errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -24,9 +23,7 @@ class AuthController {
       }
 
       const { name, email, password } = req.body;
-      
 
-      // Check if user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({
@@ -35,7 +32,6 @@ class AuthController {
         });
       }
 
-      // Create new user
       const user = new User({
         name,
         email,
@@ -44,17 +40,12 @@ class AuthController {
 
       await user.save();
 
-      // In register method, after await user.save():
       try {
-        // Create default categories for new user
         await Category.createDefaultCategories(user._id);
       } catch (categoryError) {
         console.error('Error creating default categories:', categoryError);
-        // Don't fail registration if categories fail
       }
 
-
-      // Generate token
       const token = this.generateToken(user._id);
 
       res.status(201).json({
@@ -76,12 +67,11 @@ class AuthController {
         message: 'Server error during registration'
       });
     }
-  }
+  };
 
   // Login user
-  async login(req, res) {
+  login = async (req, res) => {
     try {
-      // Check validation errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -92,7 +82,6 @@ class AuthController {
 
       const { email, password } = req.body;
 
-      // Find user and include password for comparison
       const user = await User.findOne({ email }).select('+password');
       if (!user) {
         return res.status(400).json({
@@ -101,7 +90,6 @@ class AuthController {
         });
       }
 
-      // Check password
       const isPasswordCorrect = await user.comparePassword(password);
       if (!isPasswordCorrect) {
         return res.status(400).json({
@@ -110,7 +98,6 @@ class AuthController {
         });
       }
 
-      // Generate token
       const token = this.generateToken(user._id);
 
       res.json({
@@ -132,12 +119,11 @@ class AuthController {
         message: 'Server error during login'
       });
     }
-  }
+  };
 
   // Get current user profile
-  async getProfile(req, res) {
+  getProfile = async (req, res) => {
     try {
-      // req.user is set by auth middleware
       const user = await User.findById(req.user.userId);
       if (!user) {
         return res.status(404).json({
@@ -163,10 +149,10 @@ class AuthController {
         message: 'Server error'
       });
     }
-  }
+  };
 
   // Update user profile
-  async updateProfile(req, res) {
+  updateProfile = async (req, res) => {
     try {
       const { name, preferences } = req.body;
 
@@ -178,7 +164,6 @@ class AuthController {
         });
       }
 
-      // Update fields
       if (name) user.name = name;
       if (preferences) {
         user.preferences = { ...user.preferences, ...preferences };
@@ -204,7 +189,7 @@ class AuthController {
         message: 'Server error'
       });
     }
-  }
+  };
 }
 
 export default new AuthController();
